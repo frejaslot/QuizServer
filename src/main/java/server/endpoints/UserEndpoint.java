@@ -25,11 +25,11 @@ public class UserEndpoint {
     //Endpoint for authorizing a user
     public Response logIn(String user) {
         String authorizedToken = mainController.authUser(new Gson().fromJson(user, User.class));
-        String myToken = crypter.encryptAndDecryptXor(authorizedToken);
+        String userToken = crypter.encryptAndDecryptXor(authorizedToken);
 
         if (authorizedToken != null) {
             Globals.log.writeLog(this.getClass().getName(), this, "User authorized", 2);
-            return Response.status(200).type("application/json").entity(new Gson().toJson(myToken)).build();
+            return Response.status(200).type("application/json").entity(new Gson().toJson(userToken)).build();
         } else {
             Globals.log.writeLog(this.getClass().getName(), this, "User not authorized", 2);
             return Response.status(401).type("text/plain").entity("Error signing in - unauthorized").build();
