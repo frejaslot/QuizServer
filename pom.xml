@@ -114,12 +114,12 @@
             <artifactId>gson</artifactId>
             <version>2.7</version>
         </dependency>
-        <!-- uncomment this to get JSON support
+
         <dependency>
             <groupId>org.glassfish.jersey.media</groupId>
             <artifactId>jersey-media-json-binding</artifactId>
         </dependency>
-        -->
+
 
         <dependency>
             <groupId>com.auth0</groupId>
