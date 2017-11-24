@@ -1,6 +1,5 @@
 package server.endpoints;
 
-
 import com.google.gson.Gson;
 import server.controller.MainController;
 import server.controller.TokenController;
@@ -59,7 +58,6 @@ public class UserEndpoint {
         }
     }
 
-
     @Path("/myuser")
     @GET
     //Getting own profile by token
@@ -93,7 +91,5 @@ public class UserEndpoint {
             Globals.log.writeLog(this.getClass().getName(), this, "User failed log out", 2);
             return Response.status(400).type("text/plain").entity("Error logging out").build();
         }
-
-
     }
 }

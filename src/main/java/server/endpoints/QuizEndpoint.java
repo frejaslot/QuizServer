@@ -23,20 +23,19 @@ public class QuizEndpoint {
 
     Crypter crypter = new Crypter();
 
-
     @GET
     @Path("/{CourseID}")
     public Response loadQuizzes(@HeaderParam("authorization") String token, @PathParam("CourseID") int courseId) throws SQLException {
+        token = new Gson().fromJson(token, String.class);
         CurrentUserContext currentUser = tokenController.getUserFromTokens(token);
 
         if (currentUser.getCurrentUser() != null) {
             ArrayList<Quiz> quizzes = quizController.loadQuizzes(courseId);
             String loadedQuizzes = new Gson().toJson(quizzes);
-            //loadedQuizzes = crypter.encryptAndDecryptXor(loadedQuizzes);
 
             if (quizzes != null) {
                 Globals.log.writeLog(this.getClass().getName(), this, "Quizzes loaded", 2);
-                return Response.status(200).type("application/json").entity(new Gson().toJson(loadedQuizzes)).build();
+                return Response.status(200).type("application/json").entity(crypter.encrypt(loadedQuizzes)).build();
             } else {
                 Globals.log.writeLog(this.getClass().getName(), this, "Empty quiz array loaded", 2);
                 return Response.status(204).type("text/plain").entity("No quizzes").build();
@@ -50,16 +49,16 @@ public class QuizEndpoint {
     @POST
     // Method for creating a quiz
     public Response createQuiz(@HeaderParam("authorization") String token, String quiz) throws SQLException {
+        token = new Gson().fromJson(token, String.class);
         CurrentUserContext currentUser = tokenController.getUserFromTokens(token);
 
         if (currentUser.getCurrentUser() != null && currentUser.isAdmin()) {
             Quiz quizCreated = quizController.createQuiz(new Gson().fromJson(quiz, Quiz.class));
             String newQuiz = new Gson().toJson(quizCreated);
-            //newQuiz = crypter.encryptAndDecryptXor(newQuiz);
 
             if (quizCreated != null) {
                 Globals.log.writeLog(this.getClass().getName(), this, "Quiz created", 2);
-                return Response.status(200).type("application/json").entity(new Gson().toJson(newQuiz)).build();
+                return Response.status(200).type("application/json").entity(crypter.encrypt(newQuiz)).build();
             } else {
                 Globals.log.writeLog(this.getClass().getName(), this, "No input to new quiz", 2);
                 return Response.status(400).type("text/plain").entity("Failed creating quiz").build();
@@ -69,7 +68,6 @@ public class QuizEndpoint {
             return Response.status(401).type("text/plain").entity("Unauthorized").build();
         }
     }
-
 
     @DELETE
     @Path("{deleteId}")
@@ -91,5 +89,4 @@ public class QuizEndpoint {
             return Response.status(401).type("text/plain").entity("Unauthorized").build();
         }
     }
-
 }
