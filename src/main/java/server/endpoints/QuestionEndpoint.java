@@ -48,16 +48,19 @@ public class QuestionEndpoint {
     @POST
     //Method for creating a question
     public Response createQuestion(@HeaderParam("authorization") String token, String question) throws SQLException {
+        question = new Gson().fromJson(question, String.class);
+        String decryptedQuestion = crypter.decrypt(question);
+
+        token = new Gson().fromJson(token, String.class);
         CurrentUserContext currentUser = tokenController.getUserFromTokens(token);
 
         if (currentUser.getCurrentUser() != null && currentUser.isAdmin()) {
-            Question questionCreated = quizController.createQuestion(new Gson().fromJson(question, Question.class));
+            Question questionCreated = quizController.createQuestion(new Gson().fromJson(decryptedQuestion, Question.class));
             String newQuestion = new Gson().toJson(questionCreated);
-            //newQuestion = crypter.encryptAndDecryptXor(newQuestion);
 
             if (questionCreated != null) {
                 Globals.log.writeLog(this.getClass().getName(), this, "Question created", 2);
-                return Response.status(200).type("application/json").entity(new Gson().toJson(newQuestion)).build();
+                return Response.status(200).type("application/json").entity(crypter.encrypt(newQuestion)).build();
             } else {
                 Globals.log.writeLog(this.getClass().getName(), this, "No input to new question", 2);
                 return Response.status(400).type("text/plain").entity("Failed creating question").build();

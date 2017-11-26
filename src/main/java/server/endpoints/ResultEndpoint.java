@@ -28,16 +28,16 @@ public class ResultEndpoint {
     //send totale number of correct answer and questions back to the user.
     @Path("{QuizId}/{UserId}")
     public Response getUserScore(@HeaderParam("authorization") String token, @PathParam("QuizId") int QuizId, @PathParam("UserId") int UserId) throws SQLException {
+        token = new Gson().fromJson(token, String.class);
         CurrentUserContext currentUser = tokenController.getUserFromTokens(token);
 
         if (currentUser.getCurrentUser() != null) {
                 Result result = userController.getResult(QuizId, UserId);
                 String loadedResult = new Gson().toJson(result);
-                //loadedResult = crypter.encryptAndDecryptXor(loadedResult);
 
                 if(result != null) {
                     Globals.log.writeLog(this.getClass().getName(), this, "Result loaded", 2);
-                    return Response.status(200).type("application/json").entity(new Gson().toJson(loadedResult)).build();
+                    return Response.status(200).type("application/json").entity(crypter.encrypt(loadedResult)).build();
                 } else {
                     Globals.log.writeLog(this.getClass().getName(), this, "Empty result array loaded", 2);
                     return Response.status(204).type("text/plain").entity("No result").build();

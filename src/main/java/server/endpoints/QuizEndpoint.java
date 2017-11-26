@@ -20,7 +20,6 @@ public class QuizEndpoint {
     DbManager dbManager = new DbManager();
     QuizController quizController = new QuizController();
     TokenController tokenController = new TokenController();
-
     Crypter crypter = new Crypter();
 
     @GET
@@ -49,11 +48,14 @@ public class QuizEndpoint {
     @POST
     // Method for creating a quiz
     public Response createQuiz(@HeaderParam("authorization") String token, String quiz) throws SQLException {
+        quiz = new Gson().fromJson(quiz, String.class);
+        String decryptedQuiz = crypter.decrypt(quiz);
+
         token = new Gson().fromJson(token, String.class);
         CurrentUserContext currentUser = tokenController.getUserFromTokens(token);
 
         if (currentUser.getCurrentUser() != null && currentUser.isAdmin()) {
-            Quiz quizCreated = quizController.createQuiz(new Gson().fromJson(quiz, Quiz.class));
+            Quiz quizCreated = quizController.createQuiz(new Gson().fromJson(decryptedQuiz, Quiz.class));
             String newQuiz = new Gson().toJson(quizCreated);
 
             if (quizCreated != null) {
