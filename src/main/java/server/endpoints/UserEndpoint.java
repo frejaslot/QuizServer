@@ -28,7 +28,6 @@ public class UserEndpoint {
 
         String authorizedToken = mainController.authUser(new Gson().fromJson(decryptedUser, User.class));
         String userToken = new Gson().toJson(authorizedToken);
-        System.out.println(userToken);
 
         if (userToken != null) {
             Globals.log.writeLog(this.getClass().getName(), this, "User authorized", 2);
@@ -79,9 +78,9 @@ public class UserEndpoint {
     @POST
     @Path("/logout")
     public Response logOut(String userId) throws  SQLException {
+
         String myUserId = new Gson().fromJson(userId, String.class);
         String decryptedId = crypter.decrypt(myUserId);
-        System.out.println(decryptedId);
         Boolean deletedToken = tokenController.deleteToken(new Gson().fromJson(decryptedId, Integer.class));
 
         if (deletedToken == true) {

@@ -4,7 +4,6 @@ import com.google.gson.Gson;
 import server.controller.QuizController;
 import server.controller.MainController;
 import server.controller.TokenController;
-import server.controller.UserController;
 import server.models.Option;
 import server.utility.CurrentUserContext;
 import server.utility.Crypter;
@@ -19,7 +18,6 @@ import java.util.ArrayList;
 @Path("/option")
 public class OptionEndpoint {
     QuizController quizController = new QuizController();
-    UserController userController = new UserController();
     TokenController tokenController = new TokenController();
     Crypter crypter = new Crypter();
 
@@ -54,7 +52,6 @@ public class OptionEndpoint {
     public Response createOption(@HeaderParam("authorization") String token, String option) throws SQLException {
         option = new Gson().fromJson(option, String.class);
         String decryptedOption = crypter.decrypt(option);
-        System.out.println(decryptedOption);
 
         token = new Gson().fromJson(token, String.class);
         CurrentUserContext currentUser = tokenController.getUserFromTokens(token);
@@ -63,40 +60,16 @@ public class OptionEndpoint {
             Option optionCreated = quizController.createOption(new Gson().fromJson(decryptedOption, Option.class));
             String newOption = new Gson().toJson(optionCreated);
 
-            System.out.println(optionCreated);
-
             if (optionCreated != null) {
                 Globals.log.writeLog(this.getClass().getName(), this, "Option created", 2);
                 return Response.status(200).type("application/json").entity(crypter.encrypt(newOption)).build();
             } else {
                 Globals.log.writeLog(this.getClass().getName(), this, "No input to new option", 2);
-                return Response.status(500).type("text/plain").entity("Failed creating option").build();
+                return Response.status(400).type("text/plain").entity("Failed creating option").build();
             }
         } else {
             Globals.log.writeLog(this.getClass().getName(), this, "Unauthorized - create option", 2);
             return Response.status(500).type("text/plain").entity("Unauthorized").build();
         }
     }
-
-    @DELETE
-    @Path("{deleteId}")
-    public Response deleteAnswer(@HeaderParam("authorization") String token, @PathParam("deleteId") int userId) throws SQLException {
-        CurrentUserContext currentUser = tokenController.getUserFromTokens(token);
-
-        if (currentUser.getCurrentUser() != null) {
-            Boolean answerDeleted = userController.deleteAnswer(userId);
-            if (answerDeleted = true) {
-                Globals.log.writeLog(this.getClass().getName(), this, "Answer deleted", 2);
-                return Response.status(200).type("text/plain").entity("Answer deleted").build();
-            } else {
-                Globals.log.writeLog(this.getClass().getName(), this, "Delete answer attempt failed", 2);
-                return Response.status(400).type("text/plain").entity("Error deleting answer").build();
-            }
-        } else {
-            Globals.log.writeLog(this.getClass().getName(), this, "Unauthorized - delete answer", 2);
-            return Response.status(401).type("text/plain").entity("Unauthorized").build();
-        }
-    }
-
-
 }

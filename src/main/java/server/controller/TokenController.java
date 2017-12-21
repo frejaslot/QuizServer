@@ -8,11 +8,8 @@ import java.sql.SQLException;
 
 public class TokenController {
 
-
     public TokenController() {
-
     }
-
 
     //Method to save the user object in a currentUser
     public CurrentUserContext getUserFromTokens(String token) throws SQLException {
